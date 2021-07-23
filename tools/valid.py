@@ -87,7 +87,8 @@ def main():
 
     if config.TEST.MODEL_FILE:
         logger.info('=> loading model from {}'.format(config.TEST.MODEL_FILE))
-        model.load_state_dict(torch.load(config.TEST.MODEL_FILE))
+        #model.load_state_dict(torch.load(config.TEST.MODEL_FILE))
+        model.load_state_dict(torch.load(config.TEST.MODEL_FILE, map_location=torch.device('cpu')), False)
     else:
         model_state_file = os.path.join(final_output_dir,
                                         'final_state.pth.tar')
@@ -95,10 +96,11 @@ def main():
         model.load_state_dict(torch.load(model_state_file))
 
     gpus = list(config.GPUS)
-    model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
+    #model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
 
     # define loss function (criterion) and optimizer
-    criterion = torch.nn.CrossEntropyLoss().cuda()
+    #criterion = torch.nn.CrossEntropyLoss().cuda()
+    criterion = torch.nn.CrossEntropyLoss().cpu()
 
     # Data loading code
     valdir = os.path.join(config.DATASET.ROOT,
@@ -116,6 +118,7 @@ def main():
         batch_size=config.TEST.BATCH_SIZE_PER_GPU*len(gpus),
         shuffle=False,
         num_workers=config.WORKERS,
+        #num_workers=0,
         pin_memory=True
     )
 

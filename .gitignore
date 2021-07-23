@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
@@ -30,6 +30,8 @@ MANIFEST
 # my_add
 tags
 data/
+*.pth
+imagenet/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
