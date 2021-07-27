@@ -73,12 +73,11 @@ def main():
     logger.info(pprint.pformat(config))
 
     # cudnn related setting
-    cudnn.benchmark = config.CUDNN.BENCHMARK
-    torch.backends.cudnn.deterministic = config.CUDNN.DETERMINISTIC
-    torch.backends.cudnn.enabled = config.CUDNN.ENABLED
+    #cudnn.benchmark = config.CUDNN.BENCHMARK
+    #torch.backends.cudnn.deterministic = config.CUDNN.DETERMINISTIC
+    #torch.backends.cudnn.enabled = config.CUDNN.ENABLED
 
-    model = eval('models.'+config.MODEL.NAME+'.get_cls_net')(
-        config)
+    model = eval('models.'+config.MODEL.NAME+'.get_cls_net')(config)
 
     dump_input = torch.rand(
         (1, 3, config.MODEL.IMAGE_SIZE[1], config.MODEL.IMAGE_SIZE[0])
@@ -95,7 +94,7 @@ def main():
         logger.info('=> loading model from {}'.format(model_state_file))
         model.load_state_dict(torch.load(model_state_file))
 
-    gpus = list(config.GPUS)
+    #gpus = list(config.GPUS)
     #model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
 
     # define loss function (criterion) and optimizer
@@ -115,10 +114,10 @@ def main():
             transforms.ToTensor(),
             normalize,
         ])),
-        batch_size=config.TEST.BATCH_SIZE_PER_GPU*len(gpus),
+        #batch_size=config.TEST.BATCH_SIZE_PER_GPU*len(gpus),
+        batch_size=config.TEST.BATCH_SIZE_PER_GPU,
         shuffle=False,
         num_workers=config.WORKERS,
-        #num_workers=0,
         pin_memory=True
     )
 

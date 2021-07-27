@@ -10,6 +10,7 @@ from __future__ import print_function
 
 import time
 import logging
+from tqdm import tqdm
 
 import torch
 
@@ -82,28 +83,29 @@ def train(config, train_loader, model, criterion, optimizer, epoch,
 
 
 def validate(config, val_loader, model, criterion, output_dir, tb_log_dir,
-             writer_dict=None):
+             writer_dict=None, device="cpu"):
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
 
     # switch to evaluate mode
-    model.eval()
+    model.eval().to(device)
 
     with torch.no_grad():
         end = time.time()
-        for i, (input, target) in enumerate(val_loader):
+        for i, (input, target) in tqdm(enumerate(val_loader)):
+            input = input.to(device)
+            # target = target.to(device)
             # compute output
             output = model(input)
-
             #target = target.cuda(non_blocking=True)
 
-            loss = criterion(output, target)
+            loss = criterion(output.to("cpu").type(torch.FloatTensor), target)
 
             # measure accuracy and record loss
             losses.update(loss.item(), input.size(0))
-            prec1, prec5 = accuracy(output, target, (1, 5))
+            prec1, prec5 = accuracy(output.to("cpu").type(torch.FloatTensor), target, (1, 5))
             top1.update(prec1[0], input.size(0))
             top5.update(prec5[0], input.size(0))
 
@@ -111,15 +113,17 @@ def validate(config, val_loader, model, criterion, output_dir, tb_log_dir,
             batch_time.update(time.time() - end)
             end = time.time()
 
-        msg = 'Test: Time {batch_time.avg:.3f}\t' \
-              'Loss {loss.avg:.4f}\t' \
-              'Error@1 {error1:.3f}\t' \
-              'Error@5 {error5:.3f}\t' \
-              'Accuracy@1 {top1.avg:.3f}\t' \
-              'Accuracy@5 {top5.avg:.3f}\t'.format(
-                  batch_time=batch_time, loss=losses, top1=top1, top5=top5,
-                  error1=100-top1.avg, error5=100-top5.avg)
+        msg = 'Device: {}\t' \
+            'Test: Time {batch_time.avg:.3f}\t' \
+            'Loss {loss.avg:.4f}\t' \
+            'Error@1 {error1:.3f}\t' \
+            'Error@5 {error5:.3f}\t' \
+            'Accuracy@1 {top1.avg:.3f}\t' \
+            'Accuracy@5 {top5.avg:.3f}\t'.format(device, 
+                batch_time=batch_time, loss=losses, top1=top1, top5=top5,
+                error1=100-top1.avg, error5=100-top5.avg)
         logger.info(msg)
+        print(msg)
 
         if writer_dict:
             writer = writer_dict['writer']

@@ -21,7 +21,7 @@ _C.OUTPUT_DIR = ''
 _C.LOG_DIR = ''
 _C.DATA_DIR = ''
 _C.GPUS = (0,)
-_C.WORKERS = 4
+_C.WORKERS = -1
 _C.PRINT_FREQ = 20
 _C.AUTO_RESUME = False
 _C.PIN_MEMORY = True
@@ -98,7 +98,7 @@ _C.TRAIN.SHUFFLE = True
 _C.TEST = CN()
 
 # size of images for each device
-_C.TEST.BATCH_SIZE_PER_GPU = 32
+_C.TEST.BATCH_SIZE_PER_GPU = 16
 # Test Model Epoch
 _C.TEST.FLIP_TEST = False
 _C.TEST.POST_PROCESS = False
@@ -125,27 +125,36 @@ _C.DEBUG.SAVE_HEATMAPS_GT = False
 _C.DEBUG.SAVE_HEATMAPS_PRED = False
 
 
+# def update_config(cfg, args):
+#     cfg.defrost()
+#     cfg.merge_from_file(args.cfg)
+
+#     if args.modelDir:
+#         cfg.OUTPUT_DIR = args.modelDir
+
+#     if args.logDir:
+#         cfg.LOG_DIR = args.logDir
+
+#     if args.dataDir:
+#         cfg.DATA_DIR = args.dataDir
+
+#     if args.testModel:
+#         cfg.TEST.MODEL_FILE = args.testModel
+
+#     cfg.DATASET.ROOT = os.path.join(
+#         cfg.DATA_DIR, cfg.DATASET.DATASET, 'images')
+
+#     cfg.freeze()
+
+
 def update_config(cfg, args):
     cfg.defrost()
     cfg.merge_from_file(args.cfg)
 
-    if args.modelDir:
-        cfg.OUTPUT_DIR = args.modelDir
-
-    if args.logDir:
-        cfg.LOG_DIR = args.logDir
-
-    if args.dataDir:
-        cfg.DATA_DIR = args.dataDir
-
-    if args.testModel:
-        cfg.TEST.MODEL_FILE = args.testModel
-
-    cfg.DATASET.ROOT = os.path.join(
-        cfg.DATA_DIR, cfg.DATASET.DATASET, 'images')
+    if args.weight_dir:
+        cfg.TEST.MODEL_FILE = args.weight_dir
 
     cfg.freeze()
-
 
 if __name__ == '__main__':
     import sys
